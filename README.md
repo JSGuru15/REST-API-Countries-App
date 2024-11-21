@@ -128,7 +128,7 @@ npm run lint
 
 ## Deployment
 
-The app has been deployed to [Your Deployment URL]. You can access the live demo [here](Your Live Demo URL).
+You can access the live demo https://rest-api-countries-app.onrender.com/
 
 ---
 
