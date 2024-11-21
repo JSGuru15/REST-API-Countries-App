@@ -69,6 +69,8 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import CountryList from "./CountryList.vue";
+import type { LocationQueryValue } from "vue-router";
+import type { Country } from "@/types/country";
 
 export default {
   name: "HomePage",
@@ -83,11 +85,26 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
-    const search = ref<string>(route.query.search || "");
-    const region = ref<string>(route.query.region || "");
-    const sortCriteria = ref<string>(route.query.sort || "name");
-    const sortOrder = ref<string>(route.query.order || "asc");
-    const countryInfo = ref([]);
+    const getQueryString = (
+      value:
+        | string
+        | LocationQueryValue
+        | LocationQueryValue[]
+        | null
+        | undefined
+    ): string => {
+      return typeof value === "string" ? value : "";
+    };
+
+    // Update ref initialization
+    const search = ref<string>(getQueryString(route.query.search));
+    const region = ref<string>(getQueryString(route.query.region));
+    const sortCriteria = ref<string>(
+      getQueryString(route.query.sort) || "name"
+    );
+    const sortOrder = ref<string>(getQueryString(route.query.order) || "asc");
+
+    const countryInfo = ref<Country[]>([]);
     const searchInputRef = ref<HTMLInputElement | null>(null);
     const pending = ref(false);
     const error = ref<string | null>(null);
@@ -99,21 +116,24 @@ export default {
     const fetchCountries = async () => {
       pending.value = true;
       try {
-        const response = await axios.get("https://restcountries.com/v2/all");
+        const response = await axios.get<Country[]>(
+          "https://restcountries.com/v2/all"
+        );
         countryInfo.value = response.data;
       } catch (err) {
-        error.value = err.message;
+        error.value =
+          err instanceof Error ? err.message : "An unknown error occurred";
       } finally {
         pending.value = false;
       }
     };
 
     const filteredCountries = computed(() => {
-      let results = countryInfo.value;
+      let results = [...countryInfo.value]; // Type-safe copy
 
       if (search.value.trim()) {
         results = results.filter((country) =>
-          country.name.toLowerCase().includes(search.value.toLowerCase()),
+          country.name.toLowerCase().includes(search.value.toLowerCase())
         );
       }
 
@@ -126,12 +146,11 @@ export default {
           return sortOrder.value === "asc"
             ? a.name.localeCompare(b.name)
             : b.name.localeCompare(a.name);
-        } else if (sortCriteria.value === "population") {
+        } else {
           return sortOrder.value === "asc"
             ? a.population - b.population
             : b.population - a.population;
         }
-        return 0;
       });
     });
 
@@ -167,12 +186,12 @@ export default {
     watch(
       route,
       (newRoute) => {
-        search.value = newRoute.query.search || "";
-        region.value = newRoute.query.region || "";
-        sortCriteria.value = newRoute.query.sort || "name";
-        sortOrder.value = newRoute.query.order || "asc";
+        search.value = getQueryString(newRoute.query.search);
+        region.value = getQueryString(newRoute.query.region);
+        sortCriteria.value = getQueryString(newRoute.query.sort) || "name";
+        sortOrder.value = getQueryString(newRoute.query.order) || "asc";
       },
-      { immediate: true },
+      { immediate: true }
     );
 
     onMounted(() => {

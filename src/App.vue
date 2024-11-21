@@ -17,7 +17,8 @@
 
 <script lang="ts">
 import { ref, watch } from "vue";
-import { useRoute, RouteLocationNormalized } from "vue-router";
+import { useRoute } from "vue-router";
+import type { RouteLocationNormalized } from "vue-router";
 
 export default {
   name: "App",

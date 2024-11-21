@@ -1,5 +1,5 @@
+import CountryList from "./components/CountryList.vue";
 import HomePage from "./components/HomePage.vue";
-import CountryDetail from "./components/CountryDetail.vue";
 
 const routes = [
   {
@@ -14,7 +14,7 @@ const routes = [
   {
     path: "/:country",
     name: "country-detail",
-    component: CountryDetail,
+    component: CountryList,
     props: true,
     meta: {
       title: "REST API Countries App",

@@ -30,12 +30,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import type { Country } from "@/types/country";
 
 export default defineComponent({
   name: "CountryList",
   props: {
     countries: {
-      type: Array,
+      type: Array as () => Country[],
       required: true,
     },
   },
